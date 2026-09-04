@@ -10,10 +10,10 @@ from geometry_msgs.msg import Twist
 # ==========================================
 # These four parameters MUST add up to exactly 30!
 # ==========================================
-TOP_SPEED = 8
-ACCELARATION = 7
-TURN_SPEED = 5
-SENSOR_RANGE = 10
+TOP_SPEED = 7
+ACCELARATION = 2
+TURN_SPEED = 18 # don't worry about it
+SENSOR_RANGE = 3
 
 class StudentSolver(Node):
     def __init__(self):
@@ -52,28 +52,28 @@ class StudentSolver(Node):
         cmd = Twist()
         
         #-------- DEMO LOGIC, REMOVE THIS AND WRITE YOUR OWN ---------
-        # 1. Front is blocked -> Pivot strictly in place (do not move forward!)
-        # Increased threshold to 0.65 so it has room to spin without its 0.15 radius clipping the front wall
-        if d_front < 0.65:
-            cmd.linear.x = 0.0
-            cmd.angular.z = -1.5  # Spin clockwise (right)
+       	if d_front < 0.4: # if shi in front turn right
+
+            cmd.angular.z = -67.0 # wanted to max so chose arbitrarily large number
             
-        # 2. Left side is open -> Curve around the corner
-        elif d_left > 0.8:
-            cmd.linear.x = 0.3
-            cmd.angular.z = 1.2   # Turn left
+        elif d_left < 0.6: # if shi to your left go straight but like a lil right so you don't run into corners
+
+            cmd.linear.x = 100.0
             
-        # 3. Wall hugging -> P-Controller
-        else:
-            cmd.linear.x = 0.5
+            cmd.angular.z = -1.0
             
-            # The cell is 1.0 units wide. Perfect center is 0.5.
-            target_distance = 0.5 
-            error = d_left - target_distance
-            
-            # Multiply error by a gain to steer back to the center
-            cmd.angular.z = error * 3.0
-        #-----------------------------------------------------------------
+        elif d_left > 1.0: # sails to port if nun to your left
+
+            cmd.angular.z = 200.0
+
+            cmd.linear.x = 0.7
+             
+        else: # just go straight and like a lil left, corrected by second elif
+        
+            cmd.angular.z = 1.5
+
+            cmd.linear.x = 15.0
+        #-------w----------------------------------------------------------
             
         self.cmd_pub.publish(cmd)
 
@@ -90,4 +90,3 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
-
